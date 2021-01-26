@@ -1,0 +1,6 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+TuringPlots = "d369b529-cf68-4216-8c9b-724886dd2dd3"
+
+[compat]
+Documenter = "0.26"
