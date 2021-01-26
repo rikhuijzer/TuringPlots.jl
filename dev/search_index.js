@@ -1,0 +1,3 @@
+var documenterSearchIndex = {"docs":
+[{"location":"#TuringPlots","page":"TuringPlots","title":"TuringPlots","text":"","category":"section"},{"location":"","page":"TuringPlots","title":"TuringPlots","text":"An example plot:","category":"page"},{"location":"","page":"TuringPlots","title":"TuringPlots","text":"import TuringPlots as T\nusing Markdown\n\np = T.example_plot()\nfile = \"plot.svg\"\nT.write_svg(file, p)\nMarkdown.parse(\"![Plot]($file)\")","category":"page"},{"location":"","page":"TuringPlots","title":"TuringPlots","text":"Modules = [TuringPlots]\nPublic = true","category":"page"},{"location":"","page":"TuringPlots","title":"TuringPlots","text":"Modules = [TuringPlots]\nPrivate = true","category":"page"}]
+}
