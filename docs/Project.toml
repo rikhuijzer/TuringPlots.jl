@@ -1,6 +1,8 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+MCMCChains = "c7f686f2-ff18-58e9-bc7b-31028e88f75d"
 TuringPlots = "d369b529-cf68-4216-8c9b-724886dd2dd3"
+Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
 Documenter = "0.26"
