@@ -5,7 +5,7 @@ using Random
 
 function example_data()
     n = 200
-    μ1 = 10
+    μ1 = 8
     μ2 = 12
     σ = 2
 

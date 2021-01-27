@@ -1,5 +1,8 @@
+push!(LOAD_PATH,"../src/")
+
 using Documenter
 using TuringPlots
+
 
 T = TuringPlots
 
