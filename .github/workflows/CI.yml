@@ -39,7 +39,8 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '^1.6.0-0'
-      - run: |
+      - name: pkg.instantiate
+        run: |
           julia --project=docs -e '
             using Pkg
             Pkg.develop(PackageSpec(path=pwd()))
