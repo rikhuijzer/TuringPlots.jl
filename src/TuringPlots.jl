@@ -56,7 +56,6 @@ end
 
 Plot a chains object. 
 This method makes the parameters of the chains object available to Gadfly.
-```
 """
 function Gadfly.plot(chains::MCMCChains.Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
