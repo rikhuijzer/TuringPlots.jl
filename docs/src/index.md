@@ -29,12 +29,6 @@ using TuringPlots
      return k, θ
 end
 chains = sample(binom(9, 6), NUTS(0.65), 1000)
-
-file = "chains-plot.svg" # hide
-T.write_svg(file, # hide
-plot(chains, y = :θ)
-)
-Markdown.parse("![Plot]($file)") # hide
 ```
 
 ```@docs
