@@ -4,31 +4,20 @@ An example plot:
 
 ```@setup tutorial
 # Will make the build hang.
-# using Gadfly: show
+using Gadfly: show
 ```
 
 ```@eval
 import TuringPlots as T
 using Markdown
 
-p = T.example_plot()
-file = "plot.svg"
-T.write_svg(file, p)
-Markdown.parse("![Plot]($file)")
+T.example_plot()
 ```
 
 This package extends `Gadfly.plot` for `MCMCChains.Chains`.
 
 ```@example tutorial
 using Turing
-using TuringPlots
-
-@model function binom(n, k)
-     θ ~ Beta(1, 1)
-     k ~ Binomial(n, θ) 
-     return k, θ
-end
-chains = sample(binom(9, 6), NUTS(0.65), 1000)
 ```
 
 ```@docs
