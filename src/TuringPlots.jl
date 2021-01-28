@@ -2,7 +2,6 @@ module TuringPlots
 
 import Gadfly
 import Gadfly: plot
-import MCMCChains
 
 using DataFrames
 using Turing

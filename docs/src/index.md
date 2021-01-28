@@ -3,7 +3,8 @@
 An example plot:
 
 ```@setup tutorial
-using Gadfly: show
+# Will make the build hang.
+# using Gadfly: show
 ```
 
 ```@eval
@@ -16,7 +17,7 @@ T.write_svg(file, p)
 Markdown.parse("![Plot]($file)")
 ```
 
-This package extends `Gadfly.plot` for `MCMCChains.Chains`
+This package extends `Gadfly.plot` for `MCMCChains.Chains`.
 
 ```@example tutorial
 using Turing
@@ -30,7 +31,10 @@ end
 chains = sample(binom(9, 6), NUTS(0.65), 1000)
 
 file = "chains-plot.svg" # hide
+T.write_svg(file, # hide
 plot(chains, y = :θ)
+)
+Markdown.parse("![Plot]($file)") # hide
 ```
 
 ```@docs
