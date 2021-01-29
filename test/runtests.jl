@@ -19,10 +19,6 @@ end
         return k, θ
     end
     chn = sample(binom(9, 6), NUTS(0.65), MCMCThreads(), n_samples, n_chains)
-    
-    default = [1.0, "a"]
-    override = [2.0]
-    @test T.filter_elements!(default, override) == ["a"]
 
     p = :α
     df = T.chain_values(chn, p, 1)

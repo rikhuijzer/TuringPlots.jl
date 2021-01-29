@@ -120,17 +120,19 @@ The plot is built by creating two `Gadfly.subplot_grid`s and using `Gadfly.hstac
 function plot_parameters(chn::Chains)
     df = flatten_parameters_chains(chn)
     default_elements = [
-        Gadfly.Theme(key_position = :none)
     ]
+    mm = Gadfly.mm
     p1_elements = [
         default_elements;
         Gadfly.Guide.xlabel("Iteration");
-        Gadfly.Guide.ylabel("Sample value by Parameter")
+        Gadfly.Guide.ylabel("Sample value by Parameter");
+        Gadfly.Theme(key_position = :none, line_width=0.1mm)
     ]
     p2_elements = [
         default_elements;
         Gadfly.Guide.xlabel("Sample value");
-        Gadfly.Guide.ylabel("Density by Parameter")
+        Gadfly.Guide.ylabel("Density by Parameter");
+        Gadfly.Theme(key_position = :none)
     ]
     p1 = plot(df, ygroup = :parameter, color = :chain, x = :id, y = :value,
         Gadfly.Geom.subplot_grid(Gadfly.Geom.line),

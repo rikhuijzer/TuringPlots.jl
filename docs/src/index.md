@@ -16,7 +16,7 @@ chn
 ```
 
 This package extends `Gadfly.plot` for `MCMCChains.Chains`.
-Therefore, we can pass Gadfly elements, such as, `Geom.density`:
+Therefore, we can pass Gadfly elements, such as, `Geom.density` and `Guide.ylabel`:
 
 ```@example tutorial
 using Gadfly
@@ -29,12 +29,12 @@ plot(chn, x = :θ, Geom.density, Guide.ylabel("Density"))
 Markdown.parse("![Density plot for θ]($filename)") # hide
 ```
 
-It is also possible to plot a summary for the parameters:
+To plot all the parameters, use `plot_parameters`.
 
 ```@example tutorial
 filename = "summary.svg" # hide
 T.write_svg(filename, # hide
 plot_parameters(chn)
-; w=11inch, h=8inch) # hide
+; w=8inch, h=6inch) # hide
 Markdown.parse("![Density plot for θ]($filename)") # hide
 ```
