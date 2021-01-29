@@ -7,7 +7,11 @@ import MCMCChains
 using DataFrames
 using Turing
 
-export plot
+Chains = MCMCChains.Chains
+
+export 
+    plot,
+    plot_summary
 
 include("data.jl")
 
@@ -50,22 +54,70 @@ function subplot_elements()
     write_svg("plot.svg", p)
 end
 
+function parameters(chn::Chains)
+    P = summarize(chn)[:, :parameters]
+    if typeof(P) == Symbol
+        P = [P]
+    end
+    return P
+end
+
 """
-    plot(chains::MCMCChains.Chains,
+    n_chains(chn::Chains, parameter)
+
+Number of chains for `chn[parameter]`.
+"""
+function n_chains(chn::Chains, parameter)
+    matrix = chn[parameter].data
+    size(matrix)[2]
+end
+
+"""
+    plot(chn::MCMCChains.Chains,
         elements::ElementOrFunctionOrLayers...; mapping...) -> Plot
 
-Plot a chains object. 
-This method makes the parameters of the chains object available to Gadfly.
+Plot a chains object by transforming it to a DataFrame.
+Settings are passed to Gadfly via `elements` and `mapping`.
 """
-function Gadfly.plot(chains::MCMCChains.Chains,
+function Gadfly.plot(chn::Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
-    parameters = summarize(chains)[:, :parameters]
-    if typeof(parameters) == Symbol
-        parameters = [parameters]
-    end
-    values = [chains[p].data[:] for p in parameters]
-    df = DataFrame(Dict(zip(parameters, values)))
+    P = parameters(chains)
+    values = [chains[p].data[:] for p in P]
+    df = DataFrame(Dict(zip(P, values)))
     Gadfly.plot(df, elements...; mapping...)
+end
+
+function chain_values(chn, parameter, chain_index)
+    values = chn[parameter].data[:, chain_index]
+    DataFrame(
+        chain = repeat([chain_index], length(values)),
+        value = values
+    )
+end
+
+function flatten_chains(chn, parameter)
+    n = n_chains(chn, parameter)
+    cv = [chain_values(chn, parameter, i) for i in 1:n] 
+    vcat(cv...)
+end
+
+function flatten_parameters_chains(chn::Chains)
+    P = parameters(chn)
+end
+
+"""
+    plot_summary(chains::Chains,
+        elements::ElementOrFunctionOrLayers...; mapping...) -> Plot
+
+Plot sample value and density for each parameter of `chains`.
+The plot is built by creating two `Gadfly.subplot_grid`s and using `Gadfly.hstack`.
+"""
+function plot_summary(chn::Chains)
+    P = parameters(chn)
+    @show P
+    # values = [chains[p].data[:] for p in P]
+
+         
 end
 
 """
