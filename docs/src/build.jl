@@ -21,7 +21,7 @@ plot(chains, y = :θ)
 function turingplot_eval() 
     println("Evaluating turingplot")
     p = eval(Meta.parse("begin $turingplot_code end"))
-    T.write_svg("build/turingplot.svg", p)
+    T.write_svg("docs/build/turingplot.svg", p)
 end
 
 function build()
