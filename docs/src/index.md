@@ -10,13 +10,19 @@ T = TuringPlots
 include("../src/build.jl")
 ```
 
-After training a Turing model, we end up with a chain such as
+This package defines plotting functions for `Chains` objects, such as
+
 ```@example tutorial
 chn
 ```
 
-This package extends `Gadfly.plot` for `MCMCChains.Chains`.
-Therefore, we can pass Gadfly elements, such as, `Geom.density` and `Guide.ylabel`:
+These objects are typically created with `sample` from [Turing.jl](https://github.com/TuringLang/Turing.jl/).
+The plots in this package are based on [Gadfly.jl](https://github.com/GiovineItalia/Gadfly.jl).
+
+## Individual parameters
+
+To plot individual parameters, use `plot`.
+This is an extension of `Gadfly.plot`, so you can pass Gadfly elements like `Geom.density` and `Guide.ylabel`:
 
 ```@example tutorial
 using Gadfly
@@ -29,7 +35,9 @@ plot(chn, x = :θ, Geom.density, Guide.ylabel("Density"))
 Markdown.parse("![Density plot for θ]($filename)") # hide
 ```
 
-To plot all the parameters, use `plot_parameters`.
+## All parameters
+
+To plot all the parameters, use `plot_parameters`:
 
 ```@example tutorial
 filename = "summary.svg" # hide
