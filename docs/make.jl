@@ -15,7 +15,4 @@ makedocs(
     format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true")
 )
 
-include("src/build.jl")
-build()
-
 deploydocs(repo = "github.com/rikhuijzer/$name.git", devbranch = "main")

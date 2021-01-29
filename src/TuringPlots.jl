@@ -81,8 +81,8 @@ Settings are passed to Gadfly via `elements` and `mapping`.
 """
 function Gadfly.plot(chn::Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
-    P = parameters(chains)
-    values = [chains[p].data[:] for p in P]
+    P = parameters(chn)
+    values = [chn[p].data[:] for p in P]
     df = DataFrame(Dict(zip(P, values)))
     Gadfly.plot(df, elements...; mapping...)
 end
@@ -117,12 +117,17 @@ end
 Plot sample value and density for each parameter of `chains`.
 The plot is built by creating two `Gadfly.subplot_grid`s and using `Gadfly.hstack`.
 """
-function plot_summary(chn::Chains)
-    P = parameters(chn)
-    @show P
-    # values = [chains[p].data[:] for p in P]
-
-         
+function plot_summary(chn::Chains,
+        elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
+    df = flatten_parameters_chains(chn)
+    plot(df, ygroup = :parameter, color = :chain, x = :value,
+        elements...,
+        Gadfly.Guide.xlabel("Sample value"),
+        Gadfly.Guide.ylabel("Density by Parameter"),
+        Gadfly.Geom.subplot_grid(Gadfly.Geom.density),
+        Gadfly.Theme(key_position = :none); 
+        mapping...
+    )
 end
 
 """

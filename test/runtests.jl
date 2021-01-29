@@ -35,5 +35,6 @@ end
     @test names(df) == ["parameter", "chain", "value"]
     n_parameters = 2
     @test nrow(df) == n_parameters * n_chains * n_samples
+    @test eltype(df.chain) == Int
     @test unique(df.parameter) == [:α, :θ]
 end
