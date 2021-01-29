@@ -12,18 +12,21 @@ Summary Statistics
   parameters      mean       std   naive_se      mcse         ess      rhat
       Symbol   Float64   Float64    Float64   Float64     Float64   Float64
 
-           α    0.6304    0.2489     0.0045    0.0054   2456.5999    1.0011
-           θ    0.6246    0.1407     0.0026    0.0025   2529.4387    0.9995
+           α    0.6390    0.2464     0.0045    0.0048   2499.1739    1.0003
+           θ    0.6252    0.1442     0.0026    0.0026   2575.0266    1.0003
 
 Quantiles
   parameters      2.5%     25.0%     50.0%     75.0%     97.5%
       Symbol   Float64   Float64   Float64   Float64   Float64
 
-           α    0.1281    0.4439    0.6655    0.8502    0.9840
-           θ    0.3334    0.5318    0.6291    0.7252    0.8744
+           α    0.1180    0.4569    0.6755    0.8460    0.9830
+           θ    0.3248    0.5252    0.6322    0.7311    0.8705
 </pre><p>This package extends <code>Gadfly.plot</code> for <code>MCMCChains.Chains</code>. Therefore, we can pass Gadfly elements, such as, <code>Geom.density</code>:</p><pre><code class="language-julia">using Gadfly
 using TuringPlots
 
 plot(chn, x = :θ, Geom.density, Guide.ylabel(&quot;Density&quot;))</code></pre><div class="markdown"><p><img src="turingplot.svg" alt="Density plot for θ" /></p>
-</div><p>It is also possible to plot a summary for the parameters:</p><pre><code class="language-julia">plot_summary(chn, style(line_width=2mm))</code></pre><div class="markdown"><p><img src="summary.svg" alt="Density plot for θ" /></p>
-</div></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 29 January 2021 19:23">Friday 29 January 2021</span>. Using Julia version 1.6.0-beta1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+</div><p>It is also possible to plot a summary for the parameters:</p><pre><code class="language-">filename = &quot;summary.svg&quot; # hide
+T.write_svg(filename, # hide
+plot_parameters(chn)
+; w=11inch, h=8inch) # hide
+Markdown.parse(&quot;![Density plot for θ]($filename)&quot;) # hide</code></pre></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 29 January 2021 19:51">Friday 29 January 2021</span>. Using Julia version 1.6.0-beta1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
