@@ -74,25 +74,6 @@ function n_chains(chn::Chains, parameter)
     size(matrix)[2]
 end
 
-"""
-    plot(chn::MCMCChains.Chains,
-        elements::Gadfly.ElementOrFunctionOrLayers...; mapping...) -> Plot
-
-Plot a chains object by transforming it to a DataFrame.
-Settings are passed to Gadfly via `elements` and `mapping`.
-"""
-function Gadfly.plot(chn::Chains,
-        elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
-    P = parameters(chn)
-    values = [chn[p].data[:] for p in P]
-    df = DataFrame(Dict(zip(P, values)))
-    mapping = collect(mapping)
-    if VerticalCIBars in typeof.(elements)
-        elements = create_vertical_ci_bars(elements, mapping)
-    end
-    Gadfly.plot(df, elements...; mapping...)
-end
-
 function chain_values(chn, parameter, chain_index)
     values = chn[parameter].data[:, chain_index]
     DataFrame(
@@ -118,13 +99,47 @@ function flatten_parameters_chains(chn::Chains)
 end
 
 """
+    plot(chn::MCMCChains.Chains,
+        elements::Gadfly.ElementOrFunctionOrLayers...; mapping...) -> Plot
+
+Plot a chains object by transforming it to a DataFrame.
+Settings are passed to Gadfly via `elements` and `mapping`.
+"""
+function Gadfly.plot(chn::Chains,
+        elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
+    mapping = Dict(mapping)
+    if VerticalCIBars in typeof.(elements)
+        settings, elements... = create_vertical_ci_bars(elements, mapping)
+        @show settings
+    end
+    df = flatten_parameters_chains(chn)
+
+    if :filter in keys(mapping)
+        func = mapping[:filter]
+        filter!(func, df)
+        delete!(mapping, :filter)
+    end
+
+    Gadfly.plot(df, elements...; mapping...)
+end
+
+
+"""
     plot_parameters(chn::Chains)
 
 Plot sample value and density for each parameter of `chains`.
 The plot is built by creating two `Gadfly.subplot_grid`s and using `Gadfly.hstack`.
 """
-function plot_parameters(chn::Chains)
+function plot_parameters(chn::Chains; mapping...)
     df = flatten_parameters_chains(chn)
+
+    mapping = Dict(mapping)
+    if :filter in keys(mapping)
+        func = mapping[:filter]
+        filter!(func, df)
+        delete!(mapping, :filter)
+    end
+
     default_elements = [
     ]
     mm = Gadfly.mm

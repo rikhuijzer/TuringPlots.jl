@@ -29,7 +29,7 @@ function multiple_parameters(mapping)::Bool
     return false
 end
 
-function create_vertical_ci_bars(elements::Tuple, mapping)::Tuple
+function create_vertical_ci_bars(elements::Tuple, mapping)
     elements = collect(elements)
     isvert(element) = typeof(element) == VerticalCIBars
     settings = first(filter(isvert, elements))
@@ -47,5 +47,5 @@ function create_vertical_ci_bars(elements::Tuple, mapping)::Tuple
     if multiple_parameters(mapping)
         push!(elements, Gadfly.Guide.colorkey(title = "Parameter"))
     end
-    (elements..., )
+    (settings, elements...)
 end
