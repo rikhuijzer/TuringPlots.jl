@@ -111,6 +111,18 @@ function flatten_parameters_chains(chn::Chains)
 end
 
 """
+    filter_elements!(default, override)
+
+Filter Gadfly elements from `default` if they are in `override`.
+"""
+function filter_elements!(default, override)
+    for e in override
+        filter!(d -> typeof(d) != typeof(e), default)
+    end
+    default
+end
+
+"""
     plot_summary(chains::Chains,
         elements::ElementOrFunctionOrLayers...; mapping...) -> Plot
 
@@ -120,13 +132,17 @@ The plot is built by creating two `Gadfly.subplot_grid`s and using `Gadfly.hstac
 function plot_summary(chn::Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
     df = flatten_parameters_chains(chn)
-    plot(df, ygroup = :parameter, color = :chain, x = :value,
-        elements...,
+    default_elements = [
+        Gadfly.Geom.subplot_grid(Gadfly.Geom.density),
         Gadfly.Guide.xlabel("Sample value"),
         Gadfly.Guide.ylabel("Density by Parameter"),
-        Gadfly.Geom.subplot_grid(Gadfly.Geom.density),
-        Gadfly.Theme(key_position = :none); 
-        mapping...
+        Gadfly.Theme(key_position = :none)
+    ]
+    filter_elements!(default_elements, elements)
+    @show default_elements
+    plot(df, ygroup = :parameter, color = :chain, x = :value,
+        default_elements..., elements...;
+        mapping...,
     )
 end
 
