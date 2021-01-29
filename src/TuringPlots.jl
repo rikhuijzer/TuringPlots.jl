@@ -86,8 +86,9 @@ function Gadfly.plot(chn::Chains,
     P = parameters(chn)
     values = [chn[p].data[:] for p in P]
     df = DataFrame(Dict(zip(P, values)))
+    mapping = collect(mapping)
     if VerticalCIBars in typeof.(elements)
-        elements = create_vertical_ci_bars(elements)
+        elements = create_vertical_ci_bars(elements, mapping)
     end
     Gadfly.plot(df, elements...; mapping...)
 end

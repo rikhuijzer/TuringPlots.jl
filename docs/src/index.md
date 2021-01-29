@@ -59,7 +59,16 @@ plot(chn, x = :θ, vertical_ci_bars(; lower_quantile=0.05, upper_quantile=0.95))
 Markdown.parse("![Vertical central credible intervals]($filename)") # hide
 ```
 
-This can be used to create plots like the ones created by Ross et al. ([2020](#ross2020)).
+```@example tutorial
+filename = "ci-two-parameters.svg" # hide
+parameters = [:θ, :α]
+T.write_svg(filename, # hide
+plot(chn, x = parameters, color = parameters, vertical_ci_bars())
+) # hide
+Markdown.parse("![Vertical central credible intervals]($filename)") # hide
+```
+
+This can be used to create plots like the ones by Ross et al. ([2020](#ross2020)).
 
 ## References
 
@@ -68,4 +77,4 @@ This can be used to create plots like the ones created by Ross et al. ([2020](#r
 ```
 Cody T. Ross, Bruce Winterhalder, Richard McElreath. (2020).
 Racial Disparities in Police Use of Deadly Force Against Unarmed Individuals Persist After Appropriately Benchmarking Shooting Data on Violent Crime Rates.
-<https://doi.org/10.1177/1948550620916071>
+<https://doi.org/10.1177/1948550620916071>.
