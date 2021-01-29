@@ -2,7 +2,6 @@ module TuringPlots
 
 import Gadfly
 import Gadfly: plot
-import MCMCChains
 
 using DataFrames
 using Turing
@@ -57,7 +56,7 @@ end
 Plot a chains object. 
 This method makes the parameters of the chains object available to Gadfly.
 """
-function Gadfly.plot(chains::MCMCChains.Chains,
+function plot(chains::MCMCChains.Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
     parameters = summarize(chains)[:, :parameters]
     if typeof(parameters) == Symbol
