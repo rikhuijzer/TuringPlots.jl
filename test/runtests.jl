@@ -36,7 +36,7 @@ end
     @test unique(df.chain) == 1:n_chains
 
     df = T.flatten_parameters_chains(chn)
-    @test names(df) == ["parameter", "chain", "value"]
+    @test names(df) == ["parameter", "chain", "id", "value"]
     n_parameters = 2
     @test nrow(df) == n_parameters * n_chains * n_samples
     @test eltype(df.chain) == Int

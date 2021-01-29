@@ -11,7 +11,7 @@ Chains = MCMCChains.Chains
 
 export 
     plot,
-    plot_summary
+    plot_parameters
 
 include("data.jl")
 
@@ -112,26 +112,12 @@ function flatten_parameters_chains(chn::Chains)
 end
 
 """
-    filter_elements!(default, override)
-
-Filter Gadfly elements from `default` if they are in `override`.
-"""
-function filter_elements!(default, override)
-    for e in override
-        filter!(d -> typeof(d) != typeof(e), default)
-    end
-    default
-end
-
-"""
-    plot_parameters(chains::Chains,
-        elements::ElementOrFunctionOrLayers...; mapping...) -> Plot
+    plot_parameters(chn::Chains)
 
 Plot sample value and density for each parameter of `chains`.
 The plot is built by creating two `Gadfly.subplot_grid`s and using `Gadfly.hstack`.
 """
-function plot_parameters(chn::Chains,
-        elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
+function plot_parameters(chn::Chains)
     df = flatten_parameters_chains(chn)
     default_elements = [
         Gadfly.Theme(key_position = :none)
@@ -141,22 +127,18 @@ function plot_parameters(chn::Chains,
         Gadfly.Guide.xlabel("Iteration");
         Gadfly.Guide.ylabel("Sample value by Parameter")
     ]
-    filter_elements!(p1_elements, elements)
     p2_elements = [
         default_elements;
         Gadfly.Guide.xlabel("Sample value");
         Gadfly.Guide.ylabel("Density by Parameter")
     ]
-    filter_elements!(p2_elements, elements)
     p1 = plot(df, ygroup = :parameter, color = :chain, x = :id, y = :value,
         Gadfly.Geom.subplot_grid(Gadfly.Geom.line),
-        p1_elements..., elements...;
-        mapping...,
+        p1_elements...
     )
     p2 = plot(df, ygroup = :parameter, color = :chain, x = :value,
         Gadfly.Geom.subplot_grid(Gadfly.Geom.density),
-        p2_elements..., elements...;
-        mapping...,
+        p2_elements...
     )
     Gadfly.hstack(p1, p2)
 end
