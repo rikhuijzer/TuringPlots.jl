@@ -98,11 +98,16 @@ end
 function flatten_chains(chn, parameter)
     n = n_chains(chn, parameter)
     cv = [chain_values(chn, parameter, i) for i in 1:n] 
-    vcat(cv...)
+    df = vcat(cv...)
+    df.parameter = repeat([parameter], nrow(df))
+    select!(df, :parameter, :chain, :value)
+    df
 end
 
 function flatten_parameters_chains(chn::Chains)
-    P = parameters(chn)
+    params = parameters(chn)
+    fc = [flatten_chains(chn, p) for p in params]
+    vcat(fc...)
 end
 
 """

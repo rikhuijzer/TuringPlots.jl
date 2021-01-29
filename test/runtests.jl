@@ -27,7 +27,13 @@ end
     @test all(df.chain .== 1)
 
     df = T.flatten_chains(chn, p)
-    @test names(df) == ["chain", "value"]
+    @test names(df) == ["parameter", "chain", "value"]
     @test nrow(df) == n_chains * n_samples
     @test unique(df.chain) == 1:n_chains
+
+    df = T.flatten_parameters_chains(chn)
+    @test names(df) == ["parameter", "chain", "value"]
+    n_parameters = 2
+    @test nrow(df) == n_parameters * n_chains * n_samples
+    @test unique(df.parameter) == [:α, :θ]
 end
