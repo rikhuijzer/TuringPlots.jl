@@ -6,8 +6,8 @@ include("../src/build.jl")
 
 This package extends `Gadfly.plot` for `MCMCChains.Chains`.
 
-```@eval tutorial
-println(turingplot_code)
+```@example tutorial
+println(turingplot_code) # hide
 ```
 
 ![Turing plot](turingplot.svg)
