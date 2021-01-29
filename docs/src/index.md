@@ -34,7 +34,7 @@ It is also possible to plot a summary for the parameters:
 ```@example tutorial
 filename = "summary.svg" # hide
 T.write_svg(filename, # hide
-plot_summary(chn, style(line_width=2mm))
-) # hide
+plot_parameters(chn)
+; w=11inch, h=8inch) # hide
 Markdown.parse("![Density plot for θ]($filename)") # hide
 ```

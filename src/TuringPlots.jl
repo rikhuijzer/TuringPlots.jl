@@ -91,6 +91,7 @@ function chain_values(chn, parameter, chain_index)
     values = chn[parameter].data[:, chain_index]
     DataFrame(
         chain = repeat([chain_index], length(values)),
+        id = 1:length(values),
         value = values
     )
 end
@@ -100,7 +101,7 @@ function flatten_chains(chn, parameter)
     cv = [chain_values(chn, parameter, i) for i in 1:n] 
     df = vcat(cv...)
     df.parameter = repeat([parameter], nrow(df))
-    select!(df, :parameter, :chain, :value)
+    select!(df, :parameter, :chain, :id, :value)
     df
 end
 
@@ -123,27 +124,41 @@ function filter_elements!(default, override)
 end
 
 """
-    plot_summary(chains::Chains,
+    plot_parameters(chains::Chains,
         elements::ElementOrFunctionOrLayers...; mapping...) -> Plot
 
 Plot sample value and density for each parameter of `chains`.
 The plot is built by creating two `Gadfly.subplot_grid`s and using `Gadfly.hstack`.
 """
-function plot_summary(chn::Chains,
+function plot_parameters(chn::Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
     df = flatten_parameters_chains(chn)
     default_elements = [
-        Gadfly.Geom.subplot_grid(Gadfly.Geom.density),
-        Gadfly.Guide.xlabel("Sample value"),
-        Gadfly.Guide.ylabel("Density by Parameter"),
         Gadfly.Theme(key_position = :none)
     ]
-    filter_elements!(default_elements, elements)
-    @show default_elements
-    plot(df, ygroup = :parameter, color = :chain, x = :value,
-        default_elements..., elements...;
+    p1_elements = [
+        default_elements;
+        Gadfly.Guide.xlabel("Iteration");
+        Gadfly.Guide.ylabel("Sample value by Parameter")
+    ]
+    filter_elements!(p1_elements, elements)
+    p2_elements = [
+        default_elements;
+        Gadfly.Guide.xlabel("Sample value");
+        Gadfly.Guide.ylabel("Density by Parameter")
+    ]
+    filter_elements!(p2_elements, elements)
+    p1 = plot(df, ygroup = :parameter, color = :chain, x = :id, y = :value,
+        Gadfly.Geom.subplot_grid(Gadfly.Geom.line),
+        p1_elements..., elements...;
         mapping...,
     )
+    p2 = plot(df, ygroup = :parameter, color = :chain, x = :value,
+        Gadfly.Geom.subplot_grid(Gadfly.Geom.density),
+        p2_elements..., elements...;
+        mapping...,
+    )
+    Gadfly.hstack(p1, p2)
 end
 
 """
@@ -158,6 +173,7 @@ function vertical_ci_bars()
     1 
 end
 
-write_svg(path, p) = Gadfly.draw(Gadfly.SVG(path), p)
+inch = Gadfly.inch
+write_svg(path, p; w=6inch, h=4inch) = Gadfly.draw(Gadfly.SVG(path, w, h), p)
 
 end # module
