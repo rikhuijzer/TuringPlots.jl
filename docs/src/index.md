@@ -22,7 +22,7 @@ The plots in this package are based on [Gadfly.jl](https://github.com/GiovineIta
 ## Parameters and chains
 
 To plot individual parameters, use `plot`.
-This is an extension of `Gadfly.plot`, so you can pass Gadfly elements like `Geom.density` and `Guide.ylabel`:
+This extends Gadfly, so you can pass Gadfly elements like `Geom.density` and `Guide.ylabel`:
 
 ```@example tutorial
 using Gadfly
@@ -30,13 +30,23 @@ using TuringPlots
 
 filename = "turingplot.svg" # hide
 T.write_svg(filename, # hide
-plot(chn, x = :parameter, filter = ([:parameter] => p -> p == :α), 
+plot(chn, x = :parameter, color = :parameter, Geom.density, Guide.ylabel("Density"))
+) # hide
+Markdown.parse("![Density plot for θ]($filename)") # hide
+```
+
+To show only one parameter, use `filter`:
+
+```@example tutorial
+filename = "first-filter.svg" # hide
+T.write_svg(filename, # hide
+plot(chn, x = :parameter, filter = ([:parameter] => ==(:α)), 
     Geom.density, Guide.ylabel("Density"))
 ) # hide
 Markdown.parse("![Density plot for θ]($filename)") # hide
 ```
 
-Basically, the Chains object is converted to a DataFrame of the shape
+This works because the Chains object is converted to a DataFrame of the shape
 
 parameter | chain | id | value 
 --- | --- | --- | ---
@@ -52,14 +62,15 @@ parameter | chain | id | value
 θ | 2 | 1 | ...
 θ | 2 | 2 | ...
 
-and the filter is applied to this DataFrame via `filter!` (see DataFrames.jl documentation).
+and the filter is applied to this DataFrame via `filter`.
+See the [DataFrames.jl documentation](https://dataframes.juliadata.org/stable/lib/functions/#Base.filter) for details.
 So, to plot only parameter `:α`, use
 ```
 filter = ([:parameter] => ==(:α))
 ```
 To plot only the first chain, use 
 ```
-filter = ([:chain] => ==(1))
+filter = ([:chain] => i -> i == 1)
 ```
 Or, for the first two chains
 ```
