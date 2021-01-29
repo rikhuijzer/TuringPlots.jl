@@ -11,9 +11,11 @@ Chains = MCMCChains.Chains
 
 export 
     plot,
-    plot_parameters
+    plot_parameters,
+    vertical_ci_bars
 
 include("data.jl")
+include("vertical_ci_bars.jl")
 
 function example_plot()
     df = example_data()
@@ -74,7 +76,7 @@ end
 
 """
     plot(chn::MCMCChains.Chains,
-        elements::ElementOrFunctionOrLayers...; mapping...) -> Plot
+        elements::Gadfly.ElementOrFunctionOrLayers...; mapping...) -> Plot
 
 Plot a chains object by transforming it to a DataFrame.
 Settings are passed to Gadfly via `elements` and `mapping`.
@@ -84,6 +86,9 @@ function Gadfly.plot(chn::Chains,
     P = parameters(chn)
     values = [chn[p].data[:] for p in P]
     df = DataFrame(Dict(zip(P, values)))
+    if VerticalCIBars in typeof.(elements)
+        elements = create_vertical_ci_bars(elements)
+    end
     Gadfly.plot(df, elements...; mapping...)
 end
 
@@ -143,18 +148,6 @@ function plot_parameters(chn::Chains)
         p2_elements...
     )
     Gadfly.hstack(p1, p2)
-end
-
-"""
-    vertical_ci_bars(chains)
-
-This plot shows stacked posterior distributions with central 90% credible intervals.
-Horizontally, multiple chains are stacked from different models.
-Vertically, parameters are stacked.
-"""
-function vertical_ci_bars()
-    
-    1 
 end
 
 inch = Gadfly.inch

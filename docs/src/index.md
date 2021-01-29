@@ -44,5 +44,28 @@ filename = "summary.svg" # hide
 T.write_svg(filename, # hide
 plot_parameters(chn)
 ; w=8inch, h=6inch) # hide
-Markdown.parse("![Density plot for θ]($filename)") # hide
+Markdown.parse("![Density plot all parameters]($filename)") # hide
 ```
+
+## Central credible intervals
+
+Showing vertical lines for the 90% central credible interval is possible by using 
+
+```@example tutorial
+filename = "ci.svg" # hide
+T.write_svg(filename, # hide
+plot(chn, x = :θ, vertical_ci_bars(; lower_quantile=0.05, upper_quantile=0.95))
+) # hide
+Markdown.parse("![Vertical central credible intervals]($filename)") # hide
+```
+
+This can be used to create plots like the ones created by Ross et al. ([2020](#ross2020)).
+
+## References
+
+```@raw html
+<div id="ross2020"></div>
+```
+Cody T. Ross, Bruce Winterhalder, Richard McElreath. (2020).
+Racial Disparities in Police Use of Deadly Force Against Unarmed Individuals Persist After Appropriately Benchmarking Shooting Data on Violent Crime Rates.
+<https://doi.org/10.1177/1948550620916071>
