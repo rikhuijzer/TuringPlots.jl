@@ -203,15 +203,32 @@ function test_plot(chn; mapping...)
     xlower = quantile(data, 0.1)
     ylower = pdf(k, xlower)
 
-    Gadfly.plot(x = xs, y = ys, ymin=ymin, ymax = ys, 
+    lower_start = xlower - 0.01
+    lower_end = xlower + 0.01
+    indexes = findall(x -> lower_start <= x && x <= lower_end, xs)
+    lower_xmin = xs[indexes]
+    lower_xmax = xs[indexes .+ 1]
+    lower_ymin = repeat([0], length(indexes))
+    lower_ymax = ys[indexes]
+
+    density = Gadfly.layer(x = xs, y = ys, ymin=ymin, ymax = ys, 
         Gadfly.Geom.line, Gadfly.Geom.ribbon,
         Gadfly.Theme(alphas=[0.6]),
-        Gadfly.layer(
-            xmin = [xlower], xmax = [xlower + 0.02],
-            ymin = [0], ymax = [ylower],
-            Gadfly.Geom.rect
-        )
     )
+    ci = Gadfly.layer(
+        xmin = lower_xmin, xmax = lower_xmax,
+        ymin = lower_ymin, ymax = lower_ymax,
+        Gadfly.Geom.rect
+    )
+    Gadfly.plot(x = [3], y = [1.0], Gadfly.Geom.point, density, ci)
+end
+
+function tmp_plot()
+    dist = Normal(10, 1)
+	xs = 5:0.01:15
+	ys = pdf(dist, xs)
+	# plot(x = xs, y = ys, Gadfly.Geom.line)
+    plot(y = ys, Gadfly.Stat.density)
 end
 
 end # module
