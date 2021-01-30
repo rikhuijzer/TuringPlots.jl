@@ -90,12 +90,12 @@ Markdown.parse("![Density plot all parameters]($filename)") # hide
 ```
 
 The same filtering as above works here too.
-Showing only the first 500 samples:
+Showing only the first 300 samples and 2 chains:
 
 ```@example tutorial
 filename = "summary-filter.svg" # hide
 T.write_svg(filename, # hide
-plot_parameters(chn, filter = ([:id] => i -> i <= 500))
+plot_parameters(chn, filter = ([:id, :chain] => (i, c) -> i <= 300 && c <= 2))
 ; w=8inch, h=6inch) # hide
 Markdown.parse("![Density plot all parameters]($filename)") # hide
 ```

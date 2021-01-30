@@ -99,6 +99,21 @@ function flatten_parameters_chains(chn::Chains)
 end
 
 """
+    apply_filter!(df, mapping)
+
+If the user has defined a filter, then apply this to `df`.
+"""
+function apply_filter!(df, mapping)
+    mapping = Dict(mapping)
+    if :filter in keys(mapping)
+        func = mapping[:filter]
+        filter!(func, df)
+        delete!(mapping, :filter)
+    end
+    (df, mapping)
+end
+
+"""
     plot(chn::MCMCChains.Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...) -> Plot
 
@@ -107,18 +122,12 @@ Settings are passed to Gadfly via `elements` and `mapping`.
 """
 function Gadfly.plot(chn::Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
-    mapping = Dict(mapping)
     if VerticalCIBars in typeof.(elements)
         settings, elements... = create_vertical_ci_bars(elements, mapping)
         @show settings
     end
     df = flatten_parameters_chains(chn)
-
-    if :filter in keys(mapping)
-        func = mapping[:filter]
-        filter!(func, df)
-        delete!(mapping, :filter)
-    end
+    df, mapping = apply_filter!(df, mapping)
 
     Gadfly.plot(df, elements...; mapping...)
 end
@@ -132,13 +141,7 @@ The plot is built by creating two `Gadfly.subplot_grid`s and using `Gadfly.hstac
 """
 function plot_parameters(chn::Chains; mapping...)
     df = flatten_parameters_chains(chn)
-
-    mapping = Dict(mapping)
-    if :filter in keys(mapping)
-        func = mapping[:filter]
-        filter!(func, df)
-        delete!(mapping, :filter)
-    end
+    df, mapping = apply_filter!(df, mapping)
 
     default_elements = [
     ]
