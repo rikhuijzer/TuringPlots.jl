@@ -5,9 +5,7 @@ using TuringPlots
 
 T = TuringPlots
 
-@testset "vertical-ci-bars" begin
-    df = T.example_data()
-end
+include("vertical_ci_bars.jl")
 
 @testset "plot_summary" begin
     n_samples = 200

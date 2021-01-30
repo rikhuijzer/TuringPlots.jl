@@ -1,4 +1,3 @@
-
 struct VerticalCIBars <: Gadfly.Element
     lower_quantile::Float64
     upper_quantile::Float64
@@ -21,12 +20,26 @@ end
 
 is_vbars(element) = isa(element, VerticalCIBars)
 
-vbars(elements) = first(filter(is_vbars, collect(elements)))
+function vbars(elements)
+    filtered = filter(is_vbars, collect(elements))
+    n = length(filtered)
+    try
+        return only(filtered)
+    catch ArgumentError
+        if 1 < n
+            @warn "Expected only one vertical_ci_bars(), but got $n; taking only the first."
+            return first(filtered)
+        else
+            @error "Expected at least one vertical_ci_bars()."
+            return nothing
+        end
+    end
+end
 
 """
     vertical_bars_elements(elements::Tuple, vbars::VerticalCIBars)
 
-
+Return `elements` where `::VerticalCIBars` is replaced by Gadfly elements.
 """
 function vertical_bars_elements(elements::Tuple)
     elements = collect(elements)
