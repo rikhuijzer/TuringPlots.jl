@@ -181,8 +181,14 @@ write_svg(path, p; w=6inch, h=4inch) = Gadfly.draw(Gadfly.SVG(path, w, h), p)
 function kde_values(data; kargs...)
     k = KernelDensity.kde(data; kargs...)
     d = k.density
-    (xmin = quantile(d, 0.01), xmax = quantile(d, 0.99),
-        func = x -> pdf(k, x))
+    xmin = quantile(d, 0.01)
+    @show xmin
+    xmax = quantile(d, 0.99)
+    n_samples = 250
+    step_size = (xmax - xmin) / 250
+    xs = collect(xmin:step_size:xmax)
+    ys = [pdf(k, x) for x in xs]
+    (k = k, xs = xs, ys = ys)
 end
 
 function test_plot(chn; mapping...)
@@ -191,10 +197,20 @@ function test_plot(chn; mapping...)
     subset = filter([:parameter] => ==(:α), df)
     
     data = subset.value
-    xmin, xmax, func = kde_values(data)
+    k, xs, ys = kde_values(data)
+    xmin = first(xs)
+    ymin = repeat([0.0], length(xs))
+    xlower = quantile(data, 0.1)
+    ylower = pdf(k, xlower)
 
-    Gadfly.plot(xmin = [xmin], xmax = [xmax], y = [func],
-        Gadfly.Stat.func, Gadfly.Geom.line
+    Gadfly.plot(x = xs, y = ys, ymin=ymin, ymax = ys, 
+        Gadfly.Geom.line, Gadfly.Geom.ribbon,
+        Gadfly.Theme(alphas=[0.6]),
+        Gadfly.layer(
+            xmin = [xlower], xmax = [xlower + 0.02],
+            ymin = [0], ymax = [ylower],
+            Gadfly.Geom.rect
+        )
     )
 end
 
