@@ -57,8 +57,26 @@ function vertical_bars_elements(elements::Tuple)
     Tuple(elements)
 end
 
+quantile2symbol(q::Float64) = Symbol(100 * q, :%)
+
 """
-    vertical_bars_layer(v::VerticalCIBars)
+    parameter_lower_upper(chn::Chains, v::VerticalCIBars)
+
+Returns { :parameter, :lower, :upper } DataFrame.
+This combines chains because `MCMCChains.quantile` does that too.
+"""
+function parameter_lower_upper(chn::Chains, v::VerticalCIBars)
+    P = parameters(chn)
+    Q = quantile(chn; q=[v.lower_quantile, v.upper_quantile])
+    DataFrame(
+        parameter = P,
+        lower = Q.nt[quantile2symbol(v.lower_quantile)],
+        upper = Q.nt[quantile2symbol(v.upper_quantile)],
+    )
+end
+
+"""
+    vertical_bars_layer(chn::Chains, v::VerticalCIBars)
 
 This layer contains the bars (rectangles) and is put on top of the plot.
 
@@ -66,7 +84,8 @@ The benefit of this separate layer is that it can be based on a different DataFr
 the one used for plotting the distribution.
 This way, we can avoid plotting a rectangle for each sample.
 """
-function vertical_bars_layer(v::VerticalCIBars)
+function vertical_bars_layer(chn::Chains, v::VerticalCIBars)
+    df = parameter_lower_upper(chn, v::VerticalCIBars)
     df = DataFrame(x = [0.2], y = [0.2])
     Gadfly.layer(df, x=:x, y=:y, color=:x, Gadfly.Geom.point)
 end
