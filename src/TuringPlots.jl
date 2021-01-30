@@ -226,12 +226,12 @@ function test_plot(chn; mapping...)
     Gadfly.plot(density, ci, other_density)
 end
 
-function tmp_plot()
-    dist = Normal(10, 1)
-	xs = 5:0.01:15
-	ys = pdf(dist, xs)
-	# plot(x = xs, y = ys, Gadfly.Geom.line)
-    plot(y = ys, Gadfly.Stat.density)
+function test_density_subplot(chn; mapping...)
+    df = flatten_parameters_chains(chn)
+    df, mapping = apply_filter!(df, mapping)
+
+    Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, x = :value, color=:parameter, 
+        Gadfly.Geom.subplot_grid(Gadfly.Geom.density))
 end
 
 end # module
