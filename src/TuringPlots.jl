@@ -214,13 +214,16 @@ function test_plot(chn; mapping...)
     density = Gadfly.layer(x = xs, y = ys, ymin=ymin, ymax = ys, 
         Gadfly.Geom.line, Gadfly.Geom.ribbon,
         Gadfly.Theme(alphas=[0.6]),
+        color = repeat([:first], length(xs))
     )
     ci = Gadfly.layer(
         xmin = lower_xmin, xmax = lower_xmax,
         ymin = lower_ymin, ymax = lower_ymax,
-        Gadfly.Geom.rect
+        Gadfly.Geom.rect,
+        color = repeat([:first], length(lower_xmin))
     )
-    Gadfly.plot(x = [3], y = [1.0], Gadfly.Geom.point, density, ci)
+    other_density = Gadfly.layer(x = xs, y = ys, color=repeat([:second], length(xs)), Gadfly.Geom.line, Gadfly.Stat.density)
+    Gadfly.plot(density, ci, other_density)
 end
 
 function tmp_plot()
