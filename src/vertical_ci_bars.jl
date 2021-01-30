@@ -50,9 +50,10 @@ function vertical_bars_elements(elements::Tuple)
     elements = [
         elements;
         Gadfly.Stat.density();
+        Gadfly.Guide.xticks(ticks=[0.01, 0.1, 0.99]);
         Gadfly.Geom.polygon(fill=true, preserve_order=true);
         Gadfly.Theme(alphas=[0.7]);
-        Gadfly.Guide.xlabel("")
+        Gadfly.Guide.xlabel("Foo")
     ]
     Tuple(elements)
 end
@@ -67,11 +68,18 @@ This combines chains because `MCMCChains.quantile` does that too.
 """
 function parameter_lower_upper(chn::Chains, v::VerticalCIBars)
     P = parameters(chn)
+    n_parameters = length(P)
     Q = quantile(chn; q=[v.lower_quantile, v.upper_quantile])
+    lowers = Q.nt[quantile2symbol(v.lower_quantile)]
+    uppers = Q.nt[quantile2symbol(v.upper_quantile)]
+    width = 0.004
+
     DataFrame(
         parameter = P,
-        lower = Q.nt[quantile2symbol(v.lower_quantile)],
-        upper = Q.nt[quantile2symbol(v.upper_quantile)],
+        lower_xmin = lowers .- width/2,
+        lower_xmax = lowers .+ width/2,
+        lower_ymin = repeat([0.01], n_parameters),
+        lower_ymax = repeat([0.9], n_parameters)
     )
 end
 
@@ -86,6 +94,10 @@ This way, we can avoid plotting a rectangle for each sample.
 """
 function vertical_bars_layer(chn::Chains, v::VerticalCIBars)
     df = parameter_lower_upper(chn, v::VerticalCIBars)
-    df = DataFrame(x = [0.2], y = [0.2])
-    Gadfly.layer(df, x=:x, y=:y, color=:x, Gadfly.Geom.point)
+    Gadfly.layer(df, 
+        xmin=:lower_xmin, xmax=:lower_xmax,
+        ymin=:lower_ymin, ymax=:lower_ymax,
+        color = :parameter,
+        Gadfly.Geom.rect
+    )
 end

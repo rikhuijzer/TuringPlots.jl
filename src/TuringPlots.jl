@@ -3,6 +3,7 @@ module TuringPlots
 import Compose
 import Gadfly
 import Gadfly: plot
+import KernelDensity
 import MCMCChains
 
 using DataFrames
@@ -176,5 +177,25 @@ end
 
 inch = Gadfly.inch
 write_svg(path, p; w=6inch, h=4inch) = Gadfly.draw(Gadfly.SVG(path, w, h), p)
+
+function kde_values(data; kargs...)
+    k = KernelDensity.kde(data; kargs...)
+    d = k.density
+    (xmin = quantile(d, 0.01), xmax = quantile(d, 0.99),
+        func = x -> pdf(k, x))
+end
+
+function test_plot(chn; mapping...)
+    df = flatten_parameters_chains(chn)
+    df, mapping = apply_filter!(df, mapping)
+    subset = filter([:parameter] => ==(:α), df)
+    
+    data = subset.value
+    xmin, xmax, func = kde_values(data)
+
+    Gadfly.plot(xmin = [xmin], xmax = [xmax], y = [func],
+        Gadfly.Stat.func, Gadfly.Geom.line
+    )
+end
 
 end # module
