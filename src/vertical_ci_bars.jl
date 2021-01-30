@@ -30,7 +30,6 @@ function vbars(elements)
             @warn "Expected only one vertical_ci_bars(), but got $n; taking only the first."
             return first(filtered)
         else
-            @error "Expected at least one vertical_ci_bars()."
             return nothing
         end
     end
@@ -56,4 +55,18 @@ function vertical_bars_elements(elements::Tuple)
         Gadfly.Guide.xlabel("")
     ]
     Tuple(elements)
+end
+
+"""
+    vertical_bars_layer(v::VerticalCIBars)
+
+This layer contains the bars (rectangles) and is put on top of the plot.
+
+The benefit of this separate layer is that it can be based on a different DataFrame than
+the one used for plotting the distribution.
+This way, we can avoid plotting a rectangle for each sample.
+"""
+function vertical_bars_layer(v::VerticalCIBars)
+    df = DataFrame(x = [0.2], y = [0.2])
+    Gadfly.layer(df, x=:x, y=:y, color=:x, Gadfly.Geom.point)
 end

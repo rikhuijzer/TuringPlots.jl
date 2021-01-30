@@ -124,7 +124,10 @@ Settings are passed to Gadfly via `elements` and `mapping`.
 function Gadfly.plot(chn::Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
     if VerticalCIBars in typeof.(elements)
+        v::VerticalCIBars = vbars(elements)
         elements = vertical_bars_elements(elements)
+        layer = vertical_bars_layer(v)
+        elements = tuple(elements..., layer)
     end
     df = flatten_parameters_chains(chn)
     df, mapping = apply_filter!(df, mapping)
