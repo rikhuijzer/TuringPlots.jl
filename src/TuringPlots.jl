@@ -1,5 +1,6 @@
 module TuringPlots
 
+import Compose
 import Gadfly
 import Gadfly: plot
 import MCMCChains
@@ -123,8 +124,7 @@ Settings are passed to Gadfly via `elements` and `mapping`.
 function Gadfly.plot(chn::Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
     if VerticalCIBars in typeof.(elements)
-        settings, elements... = create_vertical_ci_bars(elements, mapping)
-        @show settings
+        elements = vertical_bars_elements(elements)
     end
     df = flatten_parameters_chains(chn)
     df, mapping = apply_filter!(df, mapping)

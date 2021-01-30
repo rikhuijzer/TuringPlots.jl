@@ -1,4 +1,5 @@
 [deps]
+Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
 MCMCChains = "c7f686f2-ff18-58e9-bc7b-31028e88f75d"
