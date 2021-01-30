@@ -183,7 +183,6 @@ function kde_values(data; kargs...)
     k = KernelDensity.kde(data; kargs...)
     d = k.density
     xmin = quantile(d, 0.01)
-    @show xmin
     xmax = quantile(d, 0.99)
     n_samples = 250
     step_size = (xmax - xmin) / 250
@@ -231,8 +230,11 @@ function test_density_subplot(chn; mapping...)
     df = flatten_parameters_chains(chn)
     df, mapping = apply_filter!(df, mapping)
 
-    Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, x = :value, color=:parameter, 
-        Gadfly.Geom.subplot_grid(density_ci))
+    Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, 
+        y = :value, x = :value, color=:parameter, 
+        # Gadfly.Geom.subplot_grid(Gadfly.Geom.point)
+        Gadfly.Geom.subplot_grid(density_ci())
+    )
 end
 
 function test_flattened_plot(chn; mapping...)
