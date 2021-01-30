@@ -17,6 +17,7 @@ export
     vertical_ci_bars
 
 include("data.jl")
+include("density_ci.jl")
 include("vertical_ci_bars.jl")
 
 function example_plot()
@@ -231,7 +232,11 @@ function test_density_subplot(chn; mapping...)
     df, mapping = apply_filter!(df, mapping)
 
     Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, x = :value, color=:parameter, 
-        Gadfly.Geom.subplot_grid(Gadfly.Geom.density))
+        Gadfly.Geom.subplot_grid(density_ci))
+end
+
+function test_flattened_plot(chn; mapping...)
+       
 end
 
 end # module
