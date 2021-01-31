@@ -105,7 +105,7 @@ Markdown.parse("![Density plot all parameters]($filename)") # hide
 ```@example tutorial
 filename = "subplot-ci.svg" # hide
 T.write_svg(filename, # hide
-Gadfly.plot(chn, y = :value, color=:parameter, 
+Gadfly.plot(chn, y = :value,
     Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.4),
     Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.6),
     Gadfly.Guide.title("Density with bars for the central 90% credible interval"),

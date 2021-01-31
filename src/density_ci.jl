@@ -43,7 +43,9 @@ function vertical_bar_aes(geom, aes, data, k, xs, ys, q::Float64)
     new_aes.xmax = float.(xs[indexes] .+ 0.001)
     new_aes.ymin = float.(repeat([0], length(indexes)))
     new_aes.ymax = float.(ys[indexes])
-    new_aes.color = [first(aes.color)]
+    if !isnothing(aes.color)
+        new_aes.color = [first(aes.color)]
+    end
     new_aes
 end
 
@@ -52,7 +54,9 @@ function ribbon_aes(geom, aes, data, k, xs, ys)
     new_aes.x = float.(xs)
     new_aes.ymin = float.(repeat([0], length(xs)))
     new_aes.ymax = float.(ys)
-    new_aes.color = repeat([first(aes.color)], length(ys))
+    if !isnothing(aes.color)
+        new_aes.color = repeat([first(aes.color)], length(ys))
+    end
     new_aes
 end
 
@@ -68,7 +72,7 @@ function Gadfly.Geom.render(geom::DensityCI, theme::Gadfly.Theme, aes::Gadfly.Ae
     Gadfly.assert_aesthetics_defined("Geom.DensityCI", aes, :y)
 
     default_aes = Gadfly.Aesthetics()
-    default_aes.color = Gadfly.RGBA{Float32}[theme.default_color]
+    # default_aes.color = Gadfly.RGBA{Float32}[theme.default_color]
     default_aes.alpha = Float64[theme.alphas[1]]
     aes = Gadfly.inherit(aes, default_aes)
 
