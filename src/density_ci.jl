@@ -2,58 +2,40 @@ export
     density_ci
 
 struct DensityCI <: Gadfly.GeometryElement
-  n_samples::Int
-  bandwidth::Real
+    lower_bound::Float64
+    upper_bound::Float64
+    n_samples::Int
+    bandwidth::Real
+    line_width::Float64
 end
-DensityCI(; n_samples=256, bandwidth=-Inf) = DensityCI(n_samples, bandwidth)
-
-Gadfly.Stat.input_aesthetics(stat::DensityCIStatistic) = [:x, :color]
-Gadfly.Stat.output_aesthetics(stat::DensityCIStatistic) = [:x, :y, :ymin, :ymax, :color]
-Gadfly.Stat.default_scales(::DensityCIStatistic) = [Gadfly.Scale.y_continuous()]
-
-density_ci() = DensityCI()
-
-function Gadfly.Stat.apply_statistic(stat::DensityCIStatistic,
-        scales::Dict{Symbol, Gadfly.ScaleElement},
-        coord::Gadfly.CoordinateElement,
-        aes::Gadfly.Aesthetics)
-    Gadfly.assert_aesthetics_defined("DensityCIStatistic", aes, :x)
-    
-    if isnothing(aes.color)
-        println("Not implemented")
-    else
-        groups = Dict()
-        for (x, c) in zip(aes.x, Gadfly.cycle(aes.color))
-            if !haskey(groups, c)
-                groups[c] = Float64[x]
-            else
-                push!(groups[c], x)
-            end
-        end
-
-        colors = Array{Gadfly.RGB{Float32}}(undef, 0)
-        aes.x = Array{Float64}(undef, 0)
-        aes.y = Array{Float64}(undef, 0)
-        for (c, xs) in groups
-            bandwidth = stat.bandwidth <= 0.0 ? 
-                KernelDensity.default_bandwidth(xs) : 
-                stat.bandwidth
-            k = KernelDensity.kde(xs; bandwidth, npoints=stat.n_samples)
-            append!(aes.x, k.x)
-            append!(aes.y, k.density)
-            for _ in 1:length(k.x)
-                push!(colors, c)
-            end
-        end
-        aes.color = Gadfly.discretize_make_ia(colors)
-
-        aes.ymin = repeat([0], length(aes.x))
-        aes.ymax = repeat([0], length(aes.x))
-    end
-    aes.y_label = Gadfly.Scale.identity_formatter
+function DensityCI(; 
+        lower_bound=0.05,
+        upper_bound=0.95,
+        n_samples=256, 
+        bandwidth=-Inf,
+        line_width=0.01)
+    DensityCI(lower_bound, upper_bound, n_samples, bandwidth, line_width)
 end
+
+density_ci(; kwargs...) = DensityCI(kwargs...)
 
 Gadfly.Geom.element_aesthetics(::DensityCI) = [:x, :y, :size, :color, :shape, :alpha]
+
+function vertical_bar_aes(geom, aes, data, k, xs, ys, islowerbound::Bool)
+    new_aes = Gadfly.Aesthetics()
+    bound_quantile = islowerbound ? geom.lower_bound : geom.upper_bound
+
+    x_range_middle = quantile(data, bound_quantile)
+    x_range_min = x_range_middle - geom.line_width / 2
+    x_range_max = x_range_middle + geom.line_width / 2
+    indexes = findall(x -> x_range_min <= x && x <= x_range_max, xs)
+    new_aes.xmin = float.(xs[indexes])
+    new_aes.xmax = float.(xs[indexes] .+ 0.01)
+    new_aes.ymin = float.(repeat([0], length(indexes)))
+    new_aes.ymax = float.(ys[indexes])
+    new_aes.color = [first(aes.color)]
+    new_aes
+end
 
 # Awesome, this one is called inside subplot and we can just call other render functions.
 # The reason that we only have aes is because this method is very generic.
@@ -61,21 +43,12 @@ Gadfly.Geom.element_aesthetics(::DensityCI) = [:x, :y, :size, :color, :shape, :a
 function Gadfly.Geom.render(geom::DensityCI, theme::Gadfly.Theme, aes::Gadfly.Aesthetics)
     data = aes.y
     k, xs, ys = kde_values(data)
-    xmin = first(xs)
-    ymin = repeat([0.0], length(xs))
-    xlower = quantile(data, 0.1)
-    ylower = pdf(k, xlower)
 
-    lower_start = xlower - 0.01
-    lower_end = xlower + 0.01
-    indexes = findall(x -> lower_start <= x && x <= lower_end, xs)
-    aes.xmin = float.(xs[indexes])
-    aes.xmax = float.(xs[indexes] .+ 0.01)
-    # aes.x = float.(indexes)
-    aes.ymin = float.(repeat([0], length(indexes)))
-    aes.ymax = float.(ys[indexes])
-    aes.color = [Gadfly.LCHab(70, 60, 240)] # ["red"]
-    # aes.color = repeat([aes.color], length(indexes))
+    lower_aes = vertical_bar_aes(geom, aes, data, k, xs, ys, true)
+    lower_ctx = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, lower_aes)
 
-    Gadfly.Geom.render(Gadfly.Geom.rect(), theme, aes)
+    upper_aes = vertical_bar_aes(geom, aes, data, k, xs, ys, false)
+    upper_ctx = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, upper_aes)
+
+    return Gadfly.compose(lower_ctx, upper_ctx)
 end
