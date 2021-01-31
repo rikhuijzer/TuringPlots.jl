@@ -16,23 +16,7 @@ export
     plot_parameters,
     vertical_ci_bars
 
-include("data.jl")
 include("density_ci.jl")
-include("vertical_ci_bars.jl")
-
-function example_plot()
-    df = example_data()
-    Gadfly.plot(df, x = :U, y = :V, color = :class)
-end
-
-function example_chains()
-    @model function globe_toss(n, k)
-         θ ~ Beta(1, 1)
-         k ~ Binomial(n, θ) 
-         return k, θ
-    end
-    chains = sample(globe_toss(9, 6), NUTS(0.65), 1000)
-end
 
 # Create subplot from two layers to see what happens.
 # If this works, I can just make layers.
@@ -125,13 +109,6 @@ Settings are passed to Gadfly via `elements` and `mapping`.
 """
 function Gadfly.plot(chn::Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
-
-    if VerticalCIBars in typeof.(elements)
-        v = vbars(elements)
-        elements = vertical_bars_elements(elements)
-        layer = vertical_bars_layer(chn, v)
-        elements = tuple(elements..., layer)
-    end
 
     df = flatten_parameters_chains(chn)
     df, mapping = apply_filter!(df, mapping)
@@ -238,17 +215,6 @@ function test_density_subplot(chn; mapping...)
     )
 end
 
-function kde_values(data; kargs...)
-    k = KernelDensity.kde(data; kargs...)
-    d = k.density
-    xmin = quantile(d, 0.01)
-    xmax = quantile(d, 0.99)
-    n_samples = 1600
-    step_size = (xmax - xmin) / n_samples
-    xs = collect(xmin:step_size:xmax)
-    ys = [pdf(k, x) for x in xs]
-    (k = k, xs = xs, ys = ys)
-end
 
 function test_density_line(chn; mapping...)
     df = flatten_parameters_chains(chn)

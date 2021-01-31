@@ -100,22 +100,24 @@ plot_parameters(chn, filter = ([:id, :chain] => (i, c) -> i <= 300 && c <= 2))
 Markdown.parse("![Density plot all parameters]($filename)") # hide
 ```
 
-## Central credible intervals
-
-Showing vertical lines for the 90% central credible interval is possible by using 
+## Bars for quantiles
 
 ```@example tutorial
-filename = "ci.svg" # hide
+filename = "subplot-ci.svg" # hide
 T.write_svg(filename, # hide
-plot(chn, x = :parameter, vertical_ci_bars(; lower_quantile=0.05, upper_quantile=0.95))
-) # hide
-Markdown.parse("![Vertical central credible intervals]($filename)") # hide
-```
-
-```@example tutorial
-filename = "ci-two-parameters.svg" # hide
-T.write_svg(filename, # hide
-plot(chn, x = :parameter, color = :parameter, vertical_ci_bars())
+Gadfly.plot(chn, y = :value, color=:parameter, 
+    Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.4),
+    Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.6),
+    Gadfly.Guide.title("Density with bars for the central 90% credible interval"),
+    Gadfly.Guide.xlabel("Parameter"),
+    Gadfly.Guide.ylabel("Chain"),
+    Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
+    xgroup = :parameter, ygroup = :chain,
+    Gadfly.Geom.subplot_grid(
+        density_ci(quantiles = [0.05, 0.95]),
+        Gadfly.Guide.xlabel(orientation=:horizontal),
+    )
+; w=8inch, h=10inch)
 ) # hide
 Markdown.parse("![Vertical central credible intervals]($filename)") # hide
 ```

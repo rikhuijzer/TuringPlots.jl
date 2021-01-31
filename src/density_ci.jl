@@ -2,32 +2,40 @@ export
     density_ci
 
 struct DensityCI <: Gadfly.GeometryElement
-    lower_bound::Float64
-    upper_bound::Float64
+    quantiles::Vector{Float64}
     n_samples::Int
     bandwidth::Real
     line_width::Float64
 end
 
 function DensityCI(; 
-        lower_bound=0.05,
-        upper_bound=0.95,
+        quantiles=[0.05, 0.95],
         n_samples=256, 
         bandwidth=-Inf,
         line_width=0.01)
-    DensityCI(lower_bound, upper_bound, n_samples, bandwidth, line_width)
+    DensityCI(quantiles, n_samples, bandwidth, line_width)
 end
 
-density_ci(; kwargs...) = DensityCI(kwargs...)
+density_ci(; kwargs...) = DensityCI(; kwargs...)
 
 Gadfly.Geom.element_aesthetics(::DensityCI) = [:y, :size, :color, :shape, :alpha]
 
+function kde_values(data; kargs...)
+    k = KernelDensity.kde(data; kargs...)
+    d = k.density
+    xmin = quantile(d, 0.01)
+    xmax = quantile(d, 0.99)
+    n_samples = 1600
+    step_size = (xmax - xmin) / n_samples
+    xs = collect(xmin:step_size:xmax)
+    ys = [pdf(k, x) for x in xs]
+    (k = k, xs = xs, ys = ys)
+end
 
-function vertical_bar_aes(geom, aes, data, k, xs, ys, islowerbound::Bool)
+function vertical_bar_aes(geom, aes, data, k, xs, ys, q::Float64)
     new_aes = Gadfly.Aesthetics()
-    bound_quantile = islowerbound ? geom.lower_bound : geom.upper_bound
 
-    x_range_middle = quantile(data, bound_quantile)
+    x_range_middle = quantile(data, q)
     x_range_min = x_range_middle - geom.line_width / 2
     x_range_max = x_range_middle + geom.line_width / 2
     indexes = findall(x -> x_range_min <= x && x <= x_range_max, xs)
@@ -66,43 +74,24 @@ function Gadfly.Geom.render(geom::DensityCI, theme::Gadfly.Theme, aes::Gadfly.Ae
 
     # TODO: Split up the data based on color, so that we see multiple densities.
     data = aes.y
-    @show typeof(data)
-    @show length(data)
-    @show length(aes.color)
+    # @show length(data)
+    # @show length(aes.color)
     k, xs, ys = kde_values(data)
-
-    lower_aes = vertical_bar_aes(geom, aes, data, k, xs, ys, true)
-    lower = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, lower_aes)
-
-    upper_aes = vertical_bar_aes(geom, aes, data, k, xs, ys, false)
-    upper = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, upper_aes)
 
     rib_aes = ribbon_aes(geom, aes, data, k, xs, ys)
     theme.alphas = [0.6]
     ribbon = Gadfly.Geom.render(Gadfly.Geom.ribbon(), theme, rib_aes)
 
+    bars = []
+    for q in geom.quantiles
+        bar_aes = vertical_bar_aes(geom, aes, data, k, xs, ys, q)
+        bar = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, bar_aes)
+        push!(bars, bar)
+    end
+
     aes.x = xs
     aes.y = ys
     line = Gadfly.Geom.render(Gadfly.Geom.line(), theme, aes)
 
-    w = Gadfly.w
-    h = Gadfly.h
-    box = Gadfly.BoundingBox(0.0w, 0.0h, 1.0w, 1.0h)
-
-    # box = Gadfly.context(units=Gadfly.UnitBox(0, 0, 100, 0))
-    # box = Gadfly.context(0.0w, 0.0h, 1.4w, 1.0h)
-
-    ymax = maximum(ys)
-    xmin = quantile(k.density, 0.01)
-    xmax = quantile(k.density, 0.99)
-
-# TODO: Add Geom.line
-# TODO: Fix the missing param.
-    
-    # coord = Gadfly.Coord.cartesian(; xmin, xmax, ymax, ymin=0)
-    # scales = Dict{Symbol, Gadfly.ScaleElement}()
-    # box = Gadfly.Coord.apply_coordinate(coord, [aes], scales)
-
-    ctx = Gadfly.compose(line, ribbon, lower, upper)
-    ctx
+    Gadfly.compose(ribbon, bars..., line)
 end
