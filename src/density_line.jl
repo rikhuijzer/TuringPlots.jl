@@ -1,7 +1,7 @@
 export
-    density_ci
+    density_line
 
-struct DensityCI <: Gadfly.GeometryElement
+struct DensityLine <: Gadfly.Stats
     lower_bound::Float64
     upper_bound::Float64
     n_samples::Int
@@ -22,6 +22,17 @@ density_ci(; kwargs...) = DensityCI(kwargs...)
 
 Gadfly.Geom.element_aesthetics(::DensityCI) = [:y, :size, :color, :shape, :alpha]
 
+function kde_values(data; kargs...)
+    k = KernelDensity.kde(data; kargs...)
+    d = k.density
+    xmin = quantile(d, 0.01)
+    xmax = quantile(d, 0.99)
+    n_samples = 1600
+    step_size = (xmax - xmin) / n_samples
+    xs = collect(xmin:step_size:xmax)
+    ys = [pdf(k, x) for x in xs]
+    (k = k, xs = xs, ys = ys)
+end
 
 function vertical_bar_aes(geom, aes, data, k, xs, ys, islowerbound::Bool)
     new_aes = Gadfly.Aesthetics()
@@ -48,14 +59,6 @@ function ribbon_aes(geom, aes, data, k, xs, ys)
     new_aes
 end
 
-"""
-    Gadfly.Geom.render(geom::DensityCI, theme, aes)
-
-We need to do all the rendering manually because `Gadfly.Geom.density` 
-is a line element and therefore cannot do a ribbon at the same time.
-The way to get that normally would be via `Gadfly.Stat.density` with `Geom.polygon`.
-Unfortunately, the polygon doesn't work with subplot_grid.
-"""
 function Gadfly.Geom.render(geom::DensityCI, theme::Gadfly.Theme, aes::Gadfly.Aesthetics)
     Gadfly.assert_aesthetics_defined("Geom.DensityCI", aes, :y)
 

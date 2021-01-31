@@ -220,6 +220,8 @@ function test_density_subplot(chn; mapping...)
 
     Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, 
         y = :value, color=:parameter, 
+        Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.4),
+        Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.2),
         # Gadfly.Geom.subplot_grid(Gadfly.Geom.point)
         # density_ci(),
         # Gadfly.Geom.density,
@@ -227,6 +229,29 @@ function test_density_subplot(chn; mapping...)
         # Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
         # Gadfly.Stat.yticks(ticks = collect(0.2:0.2:1.0)),
         # Gadfly.Coord.cartesian(xmin = 0, xmax = 3)
+    )
+end
+
+function kde_values(data; kargs...)
+    k = KernelDensity.kde(data; kargs...)
+    d = k.density
+    xmin = quantile(d, 0.01)
+    xmax = quantile(d, 0.99)
+    n_samples = 1600
+    step_size = (xmax - xmin) / n_samples
+    xs = collect(xmin:step_size:xmax)
+    ys = [pdf(k, x) for x in xs]
+    (k = k, xs = xs, ys = ys)
+end
+
+function test_density_line(chn; mapping...)
+    df = flatten_parameters_chains(chn)
+    df, mapping = apply_filter!(df, mapping)
+
+    Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, 
+        y = :value, x = :value, color=:parameter, 
+        Gadfly.Geom.density,
+        Gadfly.Theme(alphas=[0.6])
     )
 end
 
