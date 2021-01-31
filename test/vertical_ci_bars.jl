@@ -8,6 +8,4 @@
 
     v = vertical_ci_bars(; lower_quantile=0.1, upper_quantile=0.9)
     df = T.parameter_lower_upper(chn, v)
-    @test names(df) == ["parameter", "lower", "upper"]
-    @test nrow(df) == n_parameters
 end
