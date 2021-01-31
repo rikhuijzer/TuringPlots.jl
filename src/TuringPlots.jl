@@ -221,11 +221,17 @@ function test_density_subplot(chn; mapping...)
     Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, 
         y = :value, color=:parameter, 
         Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.4),
-        Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.2),
+        Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.6),
+        Gadfly.Guide.xlabel("Chain"),
+        Gadfly.Guide.ylabel("Density"),
+        Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
         # Gadfly.Geom.subplot_grid(Gadfly.Geom.point)
         # density_ci(),
         # Gadfly.Geom.density,
-        Gadfly.Geom.subplot_grid(density_ci()),
+        Gadfly.Geom.subplot_grid(
+            density_ci(),
+            Gadfly.Guide.xlabel(orientation=:horizontal),
+        ),
         # Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
         # Gadfly.Stat.yticks(ticks = collect(0.2:0.2:1.0)),
         # Gadfly.Coord.cartesian(xmin = 0, xmax = 3)
