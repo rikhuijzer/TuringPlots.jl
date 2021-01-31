@@ -29,8 +29,8 @@ function vertical_bar_aes(geom, aes, data, k, xs, ys, islowerbound::Bool)
     x_range_min = x_range_middle - geom.line_width / 2
     x_range_max = x_range_middle + geom.line_width / 2
     indexes = findall(x -> x_range_min <= x && x <= x_range_max, xs)
-    new_aes.xmin = float.(xs[indexes])
-    new_aes.xmax = float.(xs[indexes] .+ 0.01)
+    new_aes.xmin = float.(xs[indexes] .- 0.001)
+    new_aes.xmax = float.(xs[indexes] .+ 0.001)
     new_aes.ymin = float.(repeat([0], length(indexes)))
     new_aes.ymax = float.(ys[indexes])
     new_aes.color = [first(aes.color)]
@@ -46,6 +46,11 @@ function vertical_ribbon_aes(geom, aes, data, k, xs, ys)
 end
 
 function Gadfly.Geom.render(geom::DensityCI, theme::Gadfly.Theme, aes::Gadfly.Aesthetics)
+    default_aes = Gadfly.Aesthetics()
+    default_aes.color = Gadfly.RGBA{Float32}[theme.default_color]
+    default_aes.alpha = Float64[theme.alphas[1]]
+    aes = Gadfly.inherit(aes, default_aes)
+
     data = aes.y
     k, xs, ys = kde_values(data)
 
@@ -56,7 +61,21 @@ function Gadfly.Geom.render(geom::DensityCI, theme::Gadfly.Theme, aes::Gadfly.Ae
     upper = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, upper_aes)
 
     ribbon_aes = vertical_ribbon_aes(geom, aes, data, k, xs, ys)
+    theme.alphas = [0.6]
     ribbon = Gadfly.Geom.render(Gadfly.Geom.ribbon(), theme, ribbon_aes)
 
-    return Gadfly.compose(lower, upper, ribbon)
+    w = Gadfly.w
+    h = Gadfly.h
+    box = Gadfly.BoundingBox(0.0w, 0.0h, 1.0w, 1.0h)
+
+
+    size_ctx = Gadfly.context(minwidth = 200, 
+        minheight = 100, units = Gadfly.UnitBox())
+
+    ctx = Gadfly.compose(ribbon, lower, upper)
+    inch = Gadfly.inch
+    @show ctx.box
+    @show ctx.clip
+    @show ctx.minwidth
+    ctx
 end

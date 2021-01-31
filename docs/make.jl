@@ -11,6 +11,7 @@ makedocs(
     sitename = name,
     pages = [
         "TuringPlots" => "index.md",
+        "Library" => "library.md"
     ],
     format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true")
 )
