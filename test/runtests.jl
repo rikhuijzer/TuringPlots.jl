@@ -17,8 +17,6 @@ const chn = sample(binom(9, 6), NUTS(0.65), MCMCThreads(), n_samples, n_chains)
 const n_parameters = length(T.parameters(chn))
 @test n_parameters == 2
 
-include("vertical_ci_bars.jl")
-
 @testset "plot_summary" begin
     p = :α
     df = T.chain_values(chn, p, 1)

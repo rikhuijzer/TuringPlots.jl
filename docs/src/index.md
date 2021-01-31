@@ -103,12 +103,28 @@ Markdown.parse("![Density plot all parameters]($filename)") # hide
 ## Bars for quantiles
 
 ```@example tutorial
+filename = "density-quantiles.svg" # hide
+T.write_svg(filename, # hide
+Gadfly.plot(chn, y = :value, color = :parameter,
+    Gadfly.Guide.title("Density with bars showing the central 90 % credible interval"),
+    Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.2),
+    Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.2),
+    Gadfly.Guide.xlabel("Sample value"),
+    Gadfly.Guide.ylabel("Density"),
+    Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
+    density_ci(quantiles = [0.05, 0.95])
+)
+) # hide
+Markdown.parse("![Density plot all parameters]($filename)") # hide
+```
+
+```@example tutorial
 filename = "subplot-ci.svg" # hide
 T.write_svg(filename, # hide
 Gadfly.plot(chn, y = :value,
-    Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.4),
+    Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.2),
     Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.6),
-    Gadfly.Guide.title("Density with bars for the central 90% credible interval"),
+    Gadfly.Guide.title("Densities with bars showing the central 90% credible interval"),
     Gadfly.Guide.xlabel("Parameter"),
     Gadfly.Guide.ylabel("Chain"),
     Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
@@ -117,7 +133,7 @@ Gadfly.plot(chn, y = :value,
         density_ci(quantiles = [0.05, 0.95]),
         Gadfly.Guide.xlabel(orientation=:horizontal),
     )
-; w=8inch, h=10inch)
-) # hide
+)
+; w=8inch, h=6inch) # hide
 Markdown.parse("![Vertical central credible intervals]($filename)") # hide
 ```
