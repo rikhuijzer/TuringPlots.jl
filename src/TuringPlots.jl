@@ -179,18 +179,6 @@ end
 inch = Gadfly.inch
 write_svg(path, p; w=6inch, h=4inch) = Gadfly.draw(Gadfly.SVG(path, w, h), p)
 
-function kde_values(data; kargs...)
-    k = KernelDensity.kde(data; kargs...)
-    d = k.density
-    xmin = quantile(d, 0.01)
-    xmax = quantile(d, 0.99)
-    n_samples = 1800
-    step_size = (xmax - xmin) / n_samples
-    xs = collect(xmin:step_size:xmax)
-    ys = [pdf(k, x) for x in xs]
-    (k = k, xs = xs, ys = ys)
-end
-
 function test_plot(chn; mapping...)
     df = flatten_parameters_chains(chn)
     df, mapping = apply_filter!(df, mapping)
@@ -233,10 +221,11 @@ function test_density_subplot(chn; mapping...)
     Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, 
         y = :value, color=:parameter, 
         # Gadfly.Geom.subplot_grid(Gadfly.Geom.point)
-        density_ci(),
-        # Gadfly.Geom.subplot_grid(density_ci()),
-        Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
-        Gadfly.Stat.yticks(ticks = collect(0.2:0.2:1.0)),
+        # density_ci(),
+        # Gadfly.Geom.density,
+        Gadfly.Geom.subplot_grid(density_ci()),
+        # Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
+        # Gadfly.Stat.yticks(ticks = collect(0.2:0.2:1.0)),
         # Gadfly.Coord.cartesian(xmin = 0, xmax = 3)
     )
 end
