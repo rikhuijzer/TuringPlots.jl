@@ -19,7 +19,7 @@ end
 
 density_ci(; kwargs...) = DensityCI(kwargs...)
 
-Gadfly.Geom.element_aesthetics(::DensityCI) = [:x, :y, :size, :color, :shape, :alpha]
+Gadfly.Geom.element_aesthetics(::DensityCI) = [:y, :size, :color, :shape, :alpha]
 
 function vertical_bar_aes(geom, aes, data, k, xs, ys, islowerbound::Bool)
     new_aes = Gadfly.Aesthetics()
@@ -37,18 +37,26 @@ function vertical_bar_aes(geom, aes, data, k, xs, ys, islowerbound::Bool)
     new_aes
 end
 
-# Awesome, this one is called inside subplot and we can just call other render functions.
-# The reason that we only have aes is because this method is very generic.
-# Works for subplot, but also for normal plots.
+function vertical_ribbon_aes(geom, aes, data, k, xs, ys)
+    new_aes = Gadfly.Aesthetics()
+    new_aes.x = float.(xs)
+    new_aes.ymin = float.(repeat([0], length(xs)))
+    new_aes.ymax = float.(ys)
+    new_aes
+end
+
 function Gadfly.Geom.render(geom::DensityCI, theme::Gadfly.Theme, aes::Gadfly.Aesthetics)
     data = aes.y
     k, xs, ys = kde_values(data)
 
     lower_aes = vertical_bar_aes(geom, aes, data, k, xs, ys, true)
-    lower_ctx = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, lower_aes)
+    lower = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, lower_aes)
 
     upper_aes = vertical_bar_aes(geom, aes, data, k, xs, ys, false)
-    upper_ctx = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, upper_aes)
+    upper = Gadfly.Geom.render(Gadfly.Geom.rect(), theme, upper_aes)
 
-    return Gadfly.compose(lower_ctx, upper_ctx)
+    ribbon_aes = vertical_ribbon_aes(geom, aes, data, k, xs, ys)
+    ribbon = Gadfly.Geom.render(Gadfly.Geom.ribbon(), theme, ribbon_aes)
+
+    return Gadfly.compose(lower, upper, ribbon)
 end

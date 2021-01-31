@@ -127,7 +127,7 @@ function Gadfly.plot(chn::Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
 
     if VerticalCIBars in typeof.(elements)
-        v::VerticalCIBars = vbars(elements)
+        v = vbars(elements)
         elements = vertical_bars_elements(elements)
         layer = vertical_bars_layer(chn, v)
         elements = tuple(elements..., layer)
@@ -231,7 +231,7 @@ function test_density_subplot(chn; mapping...)
     df, mapping = apply_filter!(df, mapping)
 
     Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, 
-        y = :value, x = :value, color=:parameter, 
+        y = :value, color=:parameter, 
         # Gadfly.Geom.subplot_grid(Gadfly.Geom.point)
         Gadfly.Geom.subplot_grid(density_ci())
     )
