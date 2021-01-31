@@ -9,4 +9,4 @@ using Turing
 end
 
 Random.seed!(123)
-const chn = sample(binom(9, 6), NUTS(0.65), MCMCThreads(), 1000, 3)
+chn = sample(binom(9, 6), NUTS(0.65), MCMCThreads(), 1000, 3)
