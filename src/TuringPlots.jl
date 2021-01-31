@@ -13,35 +13,9 @@ Chains = MCMCChains.Chains
 
 export 
     plot,
-    plot_parameters,
-    vertical_ci_bars
+    plot_parameters
 
 include("density_ci.jl")
-
-# Create subplot from two layers to see what happens.
-# If this works, I can just make layers.
-# Okay, so creating layers doesn't work. 
-# We need to go more low-level with elements or something.
-function subplot_two_layers()
-    l1 = Gadfly.layer(x = :U, y = :V) 
-    l2 = Gadfly.layer(x = :V, y = :U)
-    p = Gadfly.plot(example_data(), 
-        y = [1],
-        Gadfly.Geom.subplot_grid(example_data(), l1, l2, Gadfly.Geom.point)
-    )
-    write_svg("plot.svg", p)
-end
-
-function subplot_elements()
-    subplot = Gadfly.Geom.subplot_grid(Gadfly.Geom.point)
-    e1 = 1
-    e2 = 2
-    p = Gadfly.plot(example_data(),
-        xgroup = :class, x = :U, y = :V,
-        subplot
-    )
-    write_svg("plot.svg", p)
-end
 
 function parameters(chn::Chains)
     P = summarize(chn)[:, :parameters]
@@ -155,80 +129,5 @@ end
 
 inch = Gadfly.inch
 write_svg(path, p; w=6inch, h=4inch) = Gadfly.draw(Gadfly.SVG(path, w, h), p)
-
-function test_plot(chn; mapping...)
-    df = flatten_parameters_chains(chn)
-    df, mapping = apply_filter!(df, mapping)
-    subset = filter([:parameter] => ==(:α), df)
-    
-    data = subset.value
-    k, xs, ys = kde_values(data)
-    xmin = first(xs)
-    ymin = repeat([0.0], length(xs))
-    xlower = quantile(data, 0.1)
-    ylower = pdf(k, xlower)
-
-    lower_start = xlower - 0.01
-    lower_end = xlower + 0.01
-    indexes = findall(x -> lower_start <= x && x <= lower_end, xs)
-    lower_xmin = xs[indexes]
-    lower_xmax = xs[indexes .+ 1]
-    lower_ymin = repeat([0], length(indexes))
-    lower_ymax = ys[indexes]
-
-    density = Gadfly.layer(x = xs, y = ys, ymin=ymin, ymax = ys, 
-        Gadfly.Geom.line, Gadfly.Geom.ribbon,
-        Gadfly.Theme(alphas=[0.6]),
-        color = repeat([:first], length(xs))
-    )
-    ci = Gadfly.layer(
-        xmin = lower_xmin, xmax = lower_xmax,
-        ymin = lower_ymin, ymax = lower_ymax,
-        Gadfly.Geom.rect,
-        color = repeat([:first], length(lower_xmin))
-    )
-    other_density = Gadfly.layer(x = xs, y = ys, color=repeat([:second], length(xs)), Gadfly.Geom.line, Gadfly.Stat.density)
-    Gadfly.plot(density, ci, other_density)
-end
-
-function test_density_subplot(chn; mapping...)
-    df = flatten_parameters_chains(chn)
-    df, mapping = apply_filter!(df, mapping)
-
-    Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, 
-        y = :value, color=:parameter, 
-        Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.4),
-        Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.6),
-        Gadfly.Guide.xlabel("Chain"),
-        Gadfly.Guide.ylabel("Density"),
-        Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
-        # Gadfly.Geom.subplot_grid(Gadfly.Geom.point)
-        # density_ci(),
-        # Gadfly.Geom.density,
-        Gadfly.Geom.subplot_grid(
-            density_ci(),
-            Gadfly.Guide.xlabel(orientation=:horizontal),
-        ),
-        # Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
-        # Gadfly.Stat.yticks(ticks = collect(0.2:0.2:1.0)),
-        # Gadfly.Coord.cartesian(xmin = 0, xmax = 3)
-    )
-end
-
-
-function test_density_line(chn; mapping...)
-    df = flatten_parameters_chains(chn)
-    df, mapping = apply_filter!(df, mapping)
-
-    Gadfly.plot(df, ygroup=:parameter, xgroup =:chain, 
-        y = :value, x = :value, color=:parameter, 
-        Gadfly.Geom.density,
-        Gadfly.Theme(alphas=[0.6])
-    )
-end
-
-function test_flattened_plot(chn; mapping...)
-       
-end
 
 end # module

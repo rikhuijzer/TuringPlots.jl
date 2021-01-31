@@ -55,6 +55,8 @@ function ribbon_aes(geom, aes, data, k, xs, ys)
     new_aes.ymin = float.(repeat([0], length(xs)))
     new_aes.ymax = float.(ys)
     if !isnothing(aes.color)
+        # @show length(aes.color)
+        # @show length(xs)
         new_aes.color = repeat([first(aes.color)], length(ys))
     end
     new_aes
@@ -77,7 +79,9 @@ function Gadfly.Geom.render(geom::DensityCI, theme::Gadfly.Theme, aes::Gadfly.Ae
     aes = Gadfly.inherit(aes, default_aes)
 
     # TODO: Split up the data based on color, so that we see multiple densities.
+    # This is quite a lot of work because everything has to be vectorized.
     data = aes.y
+    # @show length(unique(aes.color))
     # @show length(data)
     # @show length(aes.color)
     k, xs, ys = kde_values(data)

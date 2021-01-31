@@ -77,7 +77,7 @@ Or, for the first two chains
 filter = ([:chain] => i -> i < 3)
 ```
 
-## All parameters
+## Sample values and densities
 
 To plot, for all parameters, the sample values per iteration and the densities, use `plot_parameters`:
 
@@ -105,7 +105,8 @@ Markdown.parse("![Density plot all parameters]($filename)") # hide
 ```@example tutorial
 filename = "density-quantiles.svg" # hide
 T.write_svg(filename, # hide
-Gadfly.plot(chn, y = :value, color = :parameter,
+Gadfly.plot(chn, y = :value,
+    filter = ([:parameter] => ==(:α)),
     Gadfly.Guide.title("Density with bars showing the central 90 % credible interval"),
     Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.2),
     Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.2),
