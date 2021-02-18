@@ -59,6 +59,18 @@ function flatten_parameters_chains(chn::Chains)
     vcat(fc...)
 end
 
+function flatten_model(model, chn)
+    df = flatten_parameters_chains(chn)
+    insertcols!(df, 1, :model => repeat([model], nrow(df)))
+    df
+end
+
+function flatten_models_parameters_chains(models::NamedTuple)
+    K = keys(models)
+    dfs = [flatten_model(k, models[k]) for k in keys(models)]
+    vcat(dfs...)
+end
+
 """
     apply_filter!(df, mapping)
 
@@ -75,6 +87,17 @@ function apply_filter!(df, mapping)
 end
 
 """
+    nominal_chain!(df)
+
+Change the column `:chain` in `df` to type String to make it nominal.
+Otherwise, Gadfly will give it a continuous legend which makes no sense here.
+"""
+function nominal_chain!(df)
+    df[!, :chain] = string.(df.chain)
+    df
+end
+
+"""
     plot(chn::MCMCChains.Chains,
         elements::Gadfly.ElementOrFunctionOrLayers...; mapping...) -> Plot
 
@@ -86,10 +109,27 @@ function Gadfly.plot(chn::Chains,
 
     df = flatten_parameters_chains(chn)
     df, mapping = apply_filter!(df, mapping)
+    nominal_chain!(df)
 
     Gadfly.plot(df, elements...; mapping...)
 end
 
+"""
+    plot(models::NamedTuple,
+        elements::Gadfly.ElementOrFunctionOrLayers...; mapping...) -> Plot
+
+Plot multipleMCMCChains.Chains by transforming the models to a DataFrame, where
+`names(df) == ["model", "parameter", "chain", "id", "value"]`.
+"""
+function Gadfly.plot(models::NamedTuple,
+        elements::Gadfly.ElementOrFunctionOrLayers...; mapping...)
+
+    df = flatten_models_parameters_chains(models)
+    df, mapping = apply_filter!(df, mapping)
+    nominal_chain!(df)
+
+    Gadfly.plot(df, elements...; mapping...)
+end
 
 """
     plot_parameters(chn::Chains)
@@ -100,6 +140,7 @@ The plot is built by creating two `Gadfly.subplot_grid`s and using `Gadfly.hstac
 function plot_parameters(chn::Chains; mapping...)
     df = flatten_parameters_chains(chn)
     df, mapping = apply_filter!(df, mapping)
+    nominal_chain!(df)
 
     default_elements = [
     ]
@@ -113,8 +154,7 @@ function plot_parameters(chn::Chains; mapping...)
     p2_elements = [
         default_elements;
         Gadfly.Guide.xlabel("Sample value");
-        Gadfly.Guide.ylabel("Density by Parameter");
-        Gadfly.Theme(key_position = :none)
+        Gadfly.Guide.ylabel("Density by Parameter")
     ]
     p1 = plot(df, ygroup = :parameter, color = :chain, x = :id, y = :value,
         Gadfly.Geom.subplot_grid(Gadfly.Geom.line),

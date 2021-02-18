@@ -34,4 +34,11 @@ const n_parameters = length(T.parameters(chn))
     @test nrow(df) == n_parameters * n_chains * n_samples
     @test eltype(df.chain) == Int
     @test unique(df.parameter) == [:α, :θ]
+
+    models = (A = chn, B = chn)
+    df = T.flatten_models_parameters_chains(models)
+    @test names(df) == ["model", "parameter", "chain", "id", "value"]
+    @test nrow(df) == length(models) * n_parameters * n_chains * n_samples
+    @test eltype(df.model) == Symbol
+    @test unique(df.model) == [:A, :B]
 end

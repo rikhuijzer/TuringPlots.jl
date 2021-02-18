@@ -100,6 +100,29 @@ plot_parameters(chn, filter = ([:id, :chain] => (i, c) -> i <= 300 && c <= 2))
 Markdown.parse("![Density plot all parameters]($filename)") # hide
 ```
 
+## Multiple models
+
+Passing a NamedTuple as the first argument is interpreted as names and MCMCChains.Chains.
+This can be used to plot multiple models:
+
+```@example tutorial
+filename = "multiple-models.svg" # hide
+models = (A = chn, B = chn2)
+T.write_svg(filename, # hide
+plot(models, x = :value,
+    color = :chain,
+    xgroup = :parameter, ygroup = :model,
+    Guide.xlabel("Parameter"),
+    Guide.ylabel("Model"),
+    Geom.subplot_grid(
+      Geom.density,
+      Guide.xlabel(orientation=:horizontal)
+    )
+)
+; w=8inch, h=6inch) # hide
+Markdown.parse("![Density plot all parameters]($filename)") # hide
+```
+
 ## Bars for quantiles
 
 ```@example tutorial
@@ -122,19 +145,22 @@ Markdown.parse("![Density plot all parameters]($filename)") # hide
 ```@example tutorial
 filename = "subplot-ci.svg" # hide
 T.write_svg(filename, # hide
-Gadfly.plot(chn, y = :value,
-    Gadfly.Scale.x_continuous(minvalue=0, maxvalue=1.2),
-    Gadfly.Scale.y_continuous(minvalue=0, maxvalue=2.6),
-    Gadfly.Guide.title("Densities with bars showing the central 90% credible interval"),
-    Gadfly.Guide.xlabel("Parameter"),
-    Gadfly.Guide.ylabel("Chain"),
-    Gadfly.Stat.xticks(ticks = collect(0.2:0.2:1.0)),
+plot(chn, y = :value,
+    Scale.x_continuous(minvalue=0, maxvalue=1.2),
+    Scale.y_continuous(minvalue=0, maxvalue=2.6),
+    Guide.title("Densities with bars showing the central 90% credible interval"),
+    Guide.xlabel("Parameter"),
+    Guide.ylabel("Chain"),
+    Stat.xticks(ticks = collect(0.2:0.2:1.0)),
     xgroup = :parameter, ygroup = :chain,
-    Gadfly.Geom.subplot_grid(
+    Geom.subplot_grid(
         density_ci(quantiles = [0.05, 0.95]),
-        Gadfly.Guide.xlabel(orientation=:horizontal),
+        Guide.xlabel(orientation=:horizontal),
     )
 )
 ; w=8inch, h=6inch) # hide
 Markdown.parse("![Vertical central credible intervals]($filename)") # hide
 ```
+
+This doesn't support multiple colors yet.
+Currently, they will be aggregated.
