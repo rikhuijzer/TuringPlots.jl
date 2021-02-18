@@ -162,5 +162,24 @@ plot(chn, y = :value,
 Markdown.parse("![Vertical central credible intervals]($filename)") # hide
 ```
 
-This doesn't support multiple colors yet.
-Currently, they will be aggregated.
+```@example tutorial
+filename = "multiple-models-ci.svg" # hide
+models = (A = chn, B = chn2)
+T.write_svg(filename, # hide
+plot(models, y = :value,
+    Scale.x_continuous(minvalue=0, maxvalue=1.2),
+    Scale.y_continuous(minvalue=0, maxvalue=2.6),
+    Guide.title("Densities with bars showing the central 90% credible interval"),
+    xgroup = :parameter, ygroup = :model,
+    Guide.xlabel("Parameter"),
+    Guide.ylabel("Model"),
+    Geom.subplot_grid(
+      density_ci(quantiles = [0.05, 0.95]),
+      Guide.xlabel(orientation=:horizontal)
+    )
+)
+; w=8inch, h=6inch) # hide
+Markdown.parse("![Density plot all parameters]($filename)") # hide
+```
+
+`density_ci` doesn't support multiple colors yet and the scales have to be manually set.
